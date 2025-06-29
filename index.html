@@ -1,66 +1,121 @@
-const scriptURL = 'https://script.google.com/macros/s/AKfycbylXJ_5iSIrj3BQQcJ0GBd1pqdBKe6khMczzm7L84tACkNMklkOK6hlYgsJ_abE96F8/exec';
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Registro de Preços - Supermercado</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f2f2f2;
+    }
 
-document.getElementById('productImage').addEventListener('input', function () {
-  document.getElementById('preview').innerHTML = `<img src="${this.value}" alt="Imagem do produto">`;
-});
+    form {
+      background: #fff;
+      padding: 20px;
+      max-width: 500px;
+      margin: auto;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
 
-document.getElementById("productForm").addEventListener("submit", function (e) {
-  e.preventDefault();
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
 
-  const name = document.getElementById("productName").value;
-  const image = document.getElementById("productImage").value;
-  const market = document.getElementById("marketName").value;
-  const currentPrice = parseFloat(document.getElementById("currentPrice").value);
-  const previousPrice = parseFloat(document.getElementById("previousPrice").value);
-  const category = document.getElementById("category").value;
+    img {
+      max-width: 100%;
+      margin-top: 10px;
+    }
 
-  // Calculado no navegador (não vai para a planilha)
-  const variation = ((currentPrice - previousPrice) / previousPrice) * 100;
-  const inflationSimulated = variation > 0 ? variation * 0.3 : variation * 0.15;
+    #dateTimeDisplay {
+      text-align: center;
+      margin-top: 15px;
+      font-weight: bold;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
 
-  const now = new Date();
-  const brTime = now.toLocaleString('pt-BR', {
-    timeZone: 'America/Sao_Paulo',
-    hour12: false
-  });
-  document.getElementById("dateTimeDisplay").textContent = "Registrado em: " + brTime;
+  <h2>Registrar novo preço de produto</h2>
 
-  // Enviar apenas dados essenciais para a planilha
-  fetch(scriptURL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      category,
-      name,
-      market,
-      currentPrice,
-      image,
-      dateTime: brTime
-    })
-  })
-  .then(response => response.text())
-  .then(responseText => {
-    alert(responseText);
-    e.target.reset();
-    document.getElementById('preview').innerHTML = '';
+  <form id="productForm">
+    <select id="category" required>
+      <option value="">Selecione a categoria</option>
+      <option value="Bebida">Bebida</option>
+      <option value="Refrigerante">Refrigerante</option>
+      <option value="Suco">Suco</option>
+      <option value="Carne">Carne</option>
+      <option value="Hortifruti">Hortifruti</option>
+      <option value="Padaria">Padaria</option>
+      <option value="Laticínios">Laticínios</option>
+      <option value="Limpeza">Limpeza</option>
+      <option value="Outro">Outro</option>
+    </select>
 
-    // Exibir os dados calculados no site
-    const card = document.createElement("div");
-    card.className = "product-card";
-    card.innerHTML = `
-      <img src="${image}" alt="${name}" />
-      <h3>${name}</h3>
-      <p><strong>Categoria:</strong> ${category}</p>
-      <p><strong>Mercado:</strong> ${market}</p>
-      <p><strong>Preço Atual:</strong> R$ ${currentPrice.toFixed(2)}</p>
-      <p><strong>Preço Anterior:</strong> R$ ${previousPrice.toFixed(2)}</p>
-      <p><strong>Variação:</strong> ${variation.toFixed(2)}%</p>
-      <p><strong>Inflação Simulada:</strong> ${inflationSimulated.toFixed(2)}%</p>
-    `;
-    document.getElementById("productList").appendChild(card);
-  })
-  .catch(error => {
-    console.error('Erro:', error);
-    alert('Erro ao registrar. Verifique a conexão ou permissões da planilha.');
-  });
-});
+    <input type="text" id="name" placeholder="Nome do produto" required>
+    <input type="text" id="market" placeholder="Supermercado" required>
+    <input type="number" id="currentPrice" placeholder="Preço atual (R$)" step="0.01" required>
+    <input type="url" id="image" placeholder="Link da imagem do produto" required>
+
+    <button type="submit">Registrar</button>
+  </form>
+
+  <div id="preview"></div>
+  <p id="dateTimeDisplay"></p>
+
+  <script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbylXJ_5iSIrj3BQQcJ0GBd1pqdBKe6khMczzm7L84tACkNMklkOK6hlYgsJ_abE96F8/exec';
+
+    document.getElementById('image').addEventListener('input', function () {
+      document.getElementById('preview').innerHTML = `<img src="${this.value}" alt="Imagem do produto">`;
+    });
+
+    document.getElementById('productForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const category = document.getElementById('category').value;
+      const name = document.getElementById('name').value;
+      const market = document.getElementById('market').value;
+      const currentPrice = parseFloat(document.getElementById('currentPrice').value);
+      const image = document.getElementById('image').value;
+
+      // Mostra a data e hora local do registro
+      const now = new Date();
+      const brTime = now.toLocaleString('pt-BR', {
+        timeZone: 'America/Sao_Paulo',
+        hour12: false
+      });
+      document.getElementById("dateTimeDisplay").textContent = "Registrado em: " + brTime;
+
+      fetch(scriptURL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          category,
+          name,
+          market,
+          currentPrice,
+          image
+        })
+      })
+      .then(response => response.text())
+      .then(responseText => {
+        alert(responseText);
+        e.target.reset();
+        document.getElementById('preview').innerHTML = '';
+      })
+      .catch(error => {
+        console.error('Erro:', error);
+        alert('Erro ao registrar. Verifique a conexão ou permissões da planilha.');
+      });
+    });
+  </script>
+
+</body>
+</html>
