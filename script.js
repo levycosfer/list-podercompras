@@ -1,66 +1,40 @@
-const scriptURL = 'https://script.google.com/macros/s/AKfycbylXJ_5iSIrj3BQQcJ0GBd1pqdBKe6khMczzm7L84tACkNMklkOK6hlYgsJ_abE96F8/exec';
+document.getElementById('product-form').addEventListener('submit', function (e) {
+    e.preventDefault();
 
-document.getElementById('productImage').addEventListener('input', function () {
-  document.getElementById('preview').innerHTML = `<img src="${this.value}" alt="Imagem do produto">`;
+    let productName = document.getElementById('product-name').value;
+    let productPrice = document.getElementById('product-price').value;
+
+    // Enviar os dados para o Google Sheets
+    sendDataToSheet(productName, productPrice);
+
+    // Simulando a inserção na tabela (no seu caso, você faria isso com dados da API)
+    const tableBody = document.getElementById('price-table').querySelector('tbody');
+    const currentDate = new Date().toLocaleString();
+    const newRow = document.createElement('tr');
+    newRow.innerHTML = `<td>${currentDate}</td><td>${productPrice}</td><td>Supermercado Exemplo</td>`;
+    tableBody.appendChild(newRow);
+
+    // Limpa o formulário
+    document.getElementById('product-form').reset();
 });
 
-document.getElementById("productForm").addEventListener("submit", function (e) {
-  e.preventDefault();
+// Função para enviar dados para o Google Sheets
+async function sendDataToSheet(productName, productPrice) {
+    try {
+        const response = await fetch('URL_DO_SEU_SCRIPT_DO_GOOGLE_APPS', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                productName: productName,
+                productPrice: productPrice,
+            }),
+        });
 
-  const name = document.getElementById("productName").value;
-  const image = document.getElementById("productImage").value;
-  const market = document.getElementById("marketName").value;
-  const currentPrice = parseFloat(document.getElementById("currentPrice").value);
-  const previousPrice = parseFloat(document.getElementById("previousPrice").value);
-  const category = document.getElementById("category").value;
-
-  // Calculado no navegador (não vai para a planilha)
-  const variation = ((currentPrice - previousPrice) / previousPrice) * 100;
-  const inflationSimulated = variation > 0 ? variation * 0.3 : variation * 0.15;
-
-  const now = new Date();
-  const brTime = now.toLocaleString('pt-BR', {
-    timeZone: 'America/Sao_Paulo',
-    hour12: false
-  });
-  document.getElementById("dateTimeDisplay").textContent = "Registrado em: " + brTime;
-
-  // Enviar apenas dados essenciais para a planilha
-  fetch(scriptURL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      category,
-      name,
-      market,
-      currentPrice,
-      image,
-      dateTime: brTime
-    })
-  })
-  .then(response => response.text())
-  .then(responseText => {
-    alert(responseText);
-    e.target.reset();
-    document.getElementById('preview').innerHTML = '';
-
-    // Exibir os dados calculados no site
-    const card = document.createElement("div");
-    card.className = "product-card";
-    card.innerHTML = `
-      <img src="${image}" alt="${name}" />
-      <h3>${name}</h3>
-      <p><strong>Categoria:</strong> ${category}</p>
-      <p><strong>Mercado:</strong> ${market}</p>
-      <p><strong>Preço Atual:</strong> R$ ${currentPrice.toFixed(2)}</p>
-      <p><strong>Preço Anterior:</strong> R$ ${previousPrice.toFixed(2)}</p>
-      <p><strong>Variação:</strong> ${variation.toFixed(2)}%</p>
-      <p><strong>Inflação Simulada:</strong> ${inflationSimulated.toFixed(2)}%</p>
-    `;
-    document.getElementById("productList").appendChild(card);
-  })
-  .catch(error => {
-    console.error('Erro:', error);
-    alert('Erro ao registrar. Verifique a conexão ou permissões da planilha.');
-  });
-});
+        const result = await response.json();
+        console.log(result);
+    } catch (error) {
+        console.error('Erro ao enviar os dados para o Google Sheets:', error);
+    }
+}
