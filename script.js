@@ -21,7 +21,7 @@ document.getElementById('product-form').addEventListener('submit', function (e) 
 // Função para enviar dados para o Google Sheets
 async function sendDataToSheet(productName, productPrice) {
     try {
-        const response = await fetch('URL_DO_SEU_SCRIPT_DO_GOOGLE_APPS', {
+        const response = await fetch('https://script.google.com/macros/s/AKfycbzExI5uCtbPSs9bzMzlO9kSC_hsnii3PlqgReI35mM-IFZh2vSegZvuWD_lSNPv2A/exec', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
