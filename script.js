@@ -1,7 +1,7 @@
 document.getElementById('product-form').addEventListener('submit', function (e) {
     e.preventDefault();
 
-    // Captura os valores dos campos
+    // Captura os dados inseridos no formulário
     let productName = document.getElementById('product-name').value;
     let productBrand = document.getElementById('product-brand').value;
     let productCategory = document.getElementById('product-category').value;
@@ -12,16 +12,10 @@ document.getElementById('product-form').addEventListener('submit', function (e) 
     let productCity = document.getElementById('product-city').value;
     let productUrl = document.getElementById('product-url').value;
 
-    // Valida se todos os campos estão preenchidos
-    if (!productName || !productBrand || !productCategory || !productQuantity || !productPrice || !productLocation || !productStoreName || !productCity || !productUrl) {
-        alert('Por favor, preencha todos os campos!');
-        return; // Interrompe o envio caso algum campo esteja vazio
-    }
-
-    // Envia os dados para o Google Sheets
+    // Envia os dados para o Google Sheets via Google Apps Script
     sendDataToSheet(productName, productBrand, productCategory, productQuantity, productPrice, productLocation, productStoreName, productCity, productUrl);
 
-    // Adiciona os dados na tabela de histórico de preços na página
+    // Adiciona uma nova linha na tabela de histórico de preços no site
     const tableBody = document.getElementById('price-table').querySelector('tbody');
     const currentDate = new Date().toLocaleString();
     const newRow = document.createElement('tr');
@@ -35,7 +29,7 @@ document.getElementById('product-form').addEventListener('submit', function (e) 
     `;
     tableBody.appendChild(newRow);
 
-    // Limpa o formulário após o envio
+    // Limpa o formulário após o envio dos dados
     document.getElementById('product-form').reset();
 });
 
