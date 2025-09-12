@@ -1,11 +1,23 @@
 document.getElementById("form").addEventListener("submit", function(event) {
     event.preventDefault();
 
+    // Coleta os dados do formulário
     const produto = document.getElementById("produto").value;
     const preco = parseFloat(document.getElementById("preco").value);
     const supermercado = document.getElementById("supermercado").value;
     const data = document.getElementById("data").value;
     const imagem = document.getElementById("imagem").value; // Link da imagem
+
+    // Validação de dados
+    if (!produto || !supermercado || !data || !imagem) {
+        alert("Todos os campos são obrigatórios.");
+        return;
+    }
+    
+    if (isNaN(preco) || preco <= 0) {
+        alert("Por favor, insira um preço válido.");
+        return;
+    }
 
     // Verificando se o produto já foi registrado para o supermercado
     let historico = JSON.parse(localStorage.getItem("historicoPrecos")) || [];
@@ -57,12 +69,19 @@ function enviarParaAppScript(produto, preco, supermercado, data, imagem) {
             'Content-Type': 'application/x-www-form-urlencoded'
         }
     })
-    .then(response => response.text())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("Erro ao enviar dados para o Google Apps Script.");
+        }
+        return response.text();
+    })
     .then(data => {
         console.log("Dados enviados para o Apps Script:", data);
+        alert("Dados registrados com sucesso no Google Sheets!");
     })
     .catch(error => {
         console.error("Erro ao enviar dados para o Apps Script:", error);
+        alert("Ocorreu um erro ao registrar o produto. Tente novamente.");
     });
 }
 
