@@ -1,66 +1,72 @@
-document.getElementById('product-form').addEventListener('submit', function (e) {
-    e.preventDefault();
+document.getElementById("form").addEventListener("submit", function(event) {
+    event.preventDefault();
 
-    // Captura os dados inseridos no formulário
-    let productName = document.getElementById('product-name').value;
-    let productBrand = document.getElementById('product-brand').value;
-    let productCategory = document.getElementById('product-category').value;
-    let productQuantity = document.getElementById('product-quantity').value;
-    let productPrice = document.getElementById('product-price').value;
-    let productLocation = document.getElementById('product-location').value;
-    let productStoreName = document.getElementById('product-store-name').value;
-    let productCity = document.getElementById('product-city').value;
-    let productUrl = document.getElementById('product-url').value;
+    const produto = document.getElementById("produto").value;
+    const preco = parseFloat(document.getElementById("preco").value);
+    const supermercado = document.getElementById("supermercado").value;
+    const data = document.getElementById("data").value;
+    const imagem = document.getElementById("imagem").value; // Link da imagem
 
-    // Envia os dados para o Google Sheets via Google Apps Script
-    sendDataToSheet(productName, productBrand, productCategory, productQuantity, productPrice, productLocation, productStoreName, productCity, productUrl);
+    // Verificando se o produto já foi registrado para o supermercado
+    let historico = JSON.parse(localStorage.getItem("historicoPrecos")) || [];
+    const produtoExistente = historico.find(item => item.produto === produto && item.supermercado === supermercado);
 
-    // Adiciona uma nova linha na tabela de histórico de preços no site
-    const tableBody = document.getElementById('price-table').querySelector('tbody');
-    const currentDate = new Date().toLocaleString();
-    const newRow = document.createElement('tr');
-    newRow.innerHTML = `
-        <td>${currentDate}</td>
-        <td>${productName}</td>
-        <td>${productPrice}</td>
-        <td>${productStoreName}</td>
-        <td>${productCity}</td>
-        <td><a href="${productUrl}" target="_blank">Link</a></td>
-    `;
-    tableBody.appendChild(newRow);
+    if (produtoExistente) {
+        // Se o produto já existir, atualiza o preço e a data
+        produtoExistente.preco = preco;
+        produtoExistente.data = data;
+        produtoExistente.imagem = imagem; // Atualiza a imagem caso o usuário insira uma nova
+        alert("Preço do produto atualizado com sucesso!");
+    } else {
+        // Se o produto não existir, adiciona um novo registro
+        const novoPreco = {
+            produto: produto,
+            preco: preco,
+            supermercado: supermercado,
+            data: data,
+            imagem: imagem
+        };
+        historico.push(novoPreco);
+        alert("Produto registrado com sucesso!");
+    }
 
-    // Limpa o formulário após o envio dos dados
-    document.getElementById('product-form').reset();
+    // Atualizando o localStorage com o novo histórico
+    localStorage.setItem("historicoPrecos", JSON.stringify(historico));
+
+    // Atualizando a tabela
+    atualizarTabela();
 });
 
-// Função para enviar os dados para o Google Sheets
-async function sendDataToSheet(productName, productBrand, productCategory, productQuantity, productPrice, productLocation, productStoreName, productCity, productUrl) {
-    try {
-        const response = await fetch('https://script.google.com/macros/s/AKfycbzExI5uCtbPSs9bzMzlO9kSC_hsnii3PlqgReI35mM-IFZh2vSegZvuWD_lSNPv2A/exec', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                productName: productName,
-                productBrand: productBrand,
-                productCategory: productCategory,
-                productQuantity: productQuantity,
-                productPrice: productPrice,
-                productLocation: productLocation,
-                productStoreName: productStoreName,
-                productCity: productCity,
-                productUrl: productUrl
-            }),
-        });
+// Função para atualizar a tabela de preços
+function atualizarTabela() {
+    let historico = JSON.parse(localStorage.getItem("historicoPrecos")) || [];
+    const tabela = document.getElementById("tabelaPrecos").getElementsByTagName('tbody')[0];
+    tabela.innerHTML = ""; // Limpar a tabela antes de adicionar novos dados
 
-        const result = await response.json();
-        if (result.result === "success") {
-            console.log('Dados enviados com sucesso!');
-        } else {
-            console.error('Erro ao registrar os dados:', result);
+    historico.forEach((item, index) => {
+        let row = tabela.insertRow();
+        row.insertCell(0).textContent = item.produto;
+        row.insertCell(1).textContent = `R$ ${item.preco.toFixed(2)}`;
+        row.insertCell(2).textContent = item.supermercado;
+        row.insertCell(3).textContent = item.data;
+
+        // Verificando a variação de preço
+        let variacao = "Sem variação";
+        if (index > 0 && item.produto === historico[index - 1].produto && item.supermercado === historico[index - 1].supermercado) {
+            let precoAnterior = historico[index - 1].preco;
+            let diff = item.preco - precoAnterior;
+            variacao = diff > 0 ? `+R$ ${diff.toFixed(2)}` : `R$ ${diff.toFixed(2)}`;
         }
-    } catch (error) {
-        console.error('Erro ao enviar os dados para o Google Sheets:', error);
-    }
+        row.insertCell(4).textContent = variacao;
+
+        // Exibindo a imagem do produto
+        let imagemCell = row.insertCell(5);
+        let img = document.createElement("img");
+        img.src = item.imagem;
+        img.alt = item.produto;
+        imagemCell.appendChild(img);
+    });
 }
+
+// Inicializando a tabela com os dados já registrados no localStorage
+atualizarTabela();

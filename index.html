@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,43 +7,45 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>
+    <div class="container">
         <h1>Comparador de Preços de Supermercado</h1>
-    </header>
+        
+        <form id="form">
+            <label for="produto">Produto:</label>
+            <input type="text" id="produto" name="produto" required>
+            
+            <label for="preco">Preço:</label>
+            <input type="number" id="preco" name="preco" required step="0.01">
+            
+            <label for="supermercado">Supermercado:</label>
+            <input type="text" id="supermercado" name="supermercado" required>
+            
+            <label for="data">Data:</label>
+            <input type="date" id="data" name="data" required>
 
-    <section id="form-section">
-        <h2>Registrar Preço do Produto</h2>
-        <form id="product-form">
-            <input type="text" id="product-name" placeholder="Nome do Produto" required>
-            <input type="text" id="product-brand" placeholder="Marca" required>
-            <input type="text" id="product-category" placeholder="Categoria" required>
-            <input type="number" id="product-quantity" placeholder="Quantidade" required>
-            <input type="number" id="product-price" placeholder="Preço" required>
-            <input type="text" id="product-location" placeholder="Local" required>
-            <input type="text" id="product-store-name" placeholder="Nome do Supermercado" required>
-            <input type="text" id="product-city" placeholder="Cidade" required>
-            <input type="url" id="product-url" placeholder="URL do Produto" required>
+            <label for="imagem">Link da Imagem:</label>
+            <input type="url" id="imagem" name="imagem" required>
+            
             <button type="submit">Registrar Preço</button>
         </form>
-    </section>
 
-    <section id="price-history">
         <h2>Histórico de Preços</h2>
-        <table id="price-table">
+        <table id="tabelaPrecos">
             <thead>
                 <tr>
-                    <th>Data</th>
                     <th>Produto</th>
                     <th>Preço</th>
                     <th>Supermercado</th>
-                    <th>Cidade</th>
-                    <th>URL</th>
+                    <th>Data</th>
+                    <th>Variação</th>
+                    <th>Imagem</th> <!-- Nova coluna para a imagem -->
                 </tr>
             </thead>
-            <tbody></tbody>
+            <tbody>
+                <!-- Dados dinâmicos vão aqui -->
+            </tbody>
         </table>
-    </section>
-
+    </div>
     <script src="script.js"></script>
 </body>
 </html>
