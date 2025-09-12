@@ -33,9 +33,38 @@ document.getElementById("form").addEventListener("submit", function(event) {
     // Atualizando o localStorage com o novo histórico
     localStorage.setItem("historicoPrecos", JSON.stringify(historico));
 
+    // Enviando os dados para o Google Apps Script
+    enviarParaAppScript(produto, preco, supermercado, data, imagem);
+
     // Atualizando a tabela
     atualizarTabela();
 });
+
+// Função para enviar os dados para o Google Apps Script
+function enviarParaAppScript(produto, preco, supermercado, data, imagem) {
+    const url = 'https://script.google.com/macros/s/AKfycbxtHXkK_JswqjSBFsE94F2RZa0VstixTGM8V0Y4Zl33KtRgj_EjmkexfU2cPNj0EpQ/exec'; // Substitua com a URL do seu Apps Script
+
+    fetch(url, {
+        method: 'POST',
+        body: new URLSearchParams({
+            produto: produto,
+            preco: preco,
+            supermercado: supermercado,
+            data: data,
+            imagem: imagem
+        }),
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+    })
+    .then(response => response.text())
+    .then(data => {
+        console.log("Dados enviados para o Apps Script:", data);
+    })
+    .catch(error => {
+        console.error("Erro ao enviar dados para o Apps Script:", error);
+    });
+}
 
 // Função para atualizar a tabela de preços
 function atualizarTabela() {
